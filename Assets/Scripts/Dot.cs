@@ -10,22 +10,26 @@ public class Dot : MonoBehaviour
     [Header("Board Variables")]
     public int column, row, previousColumn, previousRow;
     public int targetX, targetY;
+    public bool isMatch = false;
 
-    GameObject otherDot;
 
+    public GameObject otherDot;
     Board board;
     FindMatches findMatches;
+
 
 
     Vector2 firstTouchPosition;
     Vector2 finalTouchPosition;
     Vector2 tempPosition;
 
-
+    [Header("Swipe Values")]
     public float swipeAngle = 0;
     public float swipeResist = 1f;
 
-    public bool isMatch = false;
+    [Header("Powerups")]
+    public bool isColorBomb,isColumnBomb,isRowBomb;
+    public GameObject RowArrow, ColumnArrow , ColorBomb;
 
     Touch touch;
 
@@ -33,6 +37,8 @@ public class Dot : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        isColumnBomb = false;
+        isRowBomb = false;
         board = FindObjectOfType<Board>();
         findMatches = FindObjectOfType<FindMatches>();
         //targetX = (int)transform.position.x;
@@ -43,18 +49,33 @@ public class Dot : MonoBehaviour
         //previousColumn = column;
     }
 
+    //This is for Testing and DebugOnly;________________________________________________________________________________________\
+
+    private void OnMouseOver()
+    {
+        if(Input.GetMouseButtonDown(1))
+        {
+            isColorBomb = true;
+            GameObject color =Instantiate(ColorBomb,transform.position,Quaternion.identity) as GameObject; //
+            color.transform.parent = this.transform;
+        }
+    }
+    //____________________________________________________________________________________________________________________________/
+   
+    
+    
     // Update is called once per frame
     void Update()
     {
 
-      //  FindMatches();
 
+        /*
         if (isMatch)
         {
             SpriteRenderer mySprite = GetComponent<SpriteRenderer>();
             mySprite.color = new Color(1f, 1f, 1f, .2f);
         }
-
+        */
         targetX = column;
         targetY = row;
         #region Touch Input
@@ -141,10 +162,12 @@ public class Dot : MonoBehaviour
      
             MoveDot();
             board.currenState = GameState.wait;
+            board.currentDot = this;
         }
         else
         {
             board.currenState = GameState.move;
+            
         }
     }
     void MoveDot()
@@ -230,6 +253,19 @@ public class Dot : MonoBehaviour
 
     IEnumerator CheckMoveCo()
     {
+        if(isColorBomb)
+        {
+            //this piece is collor bomb and other piece is the color to destroy
+            findMatches.MatchPiecesofColor(otherDot.tag);
+            isMatch = true;
+        }
+        else if (otherDot.GetComponent<Dot>().isColorBomb)
+        {
+            //the other piece is color bomb and this piece is to be destroyed
+            findMatches.MatchPiecesofColor(this.gameObject.tag);
+            otherDot.GetComponent<Dot>().isMatch = true;
+        }
+
         yield return new WaitForSeconds(.5f);
         if(otherDot != null)
         {
@@ -240,6 +276,7 @@ public class Dot : MonoBehaviour
                 row = previousRow;
                 column = previousColumn;
                 yield return new WaitForSeconds(.5f);
+                board.currentDot = null;
                 board.currenState = GameState.move;
             }
             else
@@ -249,5 +286,20 @@ public class Dot : MonoBehaviour
 
             otherDot = null;
         }
+    }
+
+    public void MakeRowBomb()
+    {
+        isRowBomb = true;
+        GameObject arrow = Instantiate(RowArrow, transform.position, Quaternion.identity) as GameObject;
+        arrow.transform.parent = this.transform;
+    }
+
+    public void MakeColumnBomb()
+    {
+        isColumnBomb = true;
+        GameObject arrow = Instantiate(ColumnArrow, transform.position, Quaternion.identity) as GameObject;
+        arrow.transform.parent = this.transform;
+
     }
 }

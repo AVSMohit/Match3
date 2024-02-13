@@ -11,7 +11,8 @@ public enum GameState
 public class Board : MonoBehaviour
 {
     public GameState currenState = GameState.move;
-
+    FindMatches findMatches;
+   
 
     public int width;
     public int height;
@@ -19,13 +20,16 @@ public class Board : MonoBehaviour
 
     public GameObject tilePrefab;
     public GameObject[] Dots;
+    public GameObject destroyEffect;
+    public GameObject[,] allDots;
+    public Dot currentDot;
 
     BackgroundTile[,] allTiles;
-    public GameObject[,] allDots;
 
     // Start is called before the first frame update
     void Start()
     {
+        findMatches = FindAnyObjectByType<FindMatches>();
         allTiles = new BackgroundTile[width, height];
         allDots = new GameObject[width, height];
         Setup();
@@ -101,6 +105,14 @@ public class Board : MonoBehaviour
     {
         if (allDots[column, row].GetComponent<Dot>().isMatch)
         {
+            //Check How many pieces are Matched
+            if(findMatches.currenMatches.Count == 4 || findMatches.currenMatches.Count == 7)
+            {
+                findMatches.CheckBombMatch();
+            }
+            
+           GameObject particle = Instantiate(destroyEffect, allDots[column, row].transform.position,Quaternion.identity) as GameObject;
+            Destroy(particle, 0.3f);
             Destroy(allDots[column, row]);
             allDots[column,row] = null;
         }
@@ -120,6 +132,7 @@ public class Board : MonoBehaviour
                 }
             } 
         }
+        findMatches.currenMatches.Clear();
         StartCoroutine(DecreaseRowCo());
     }
 
@@ -143,20 +156,22 @@ public class Board : MonoBehaviour
             }
             nullCount = 0;
         }
-        yield return new WaitForSeconds(0.4f);
+        yield return new WaitForSeconds(0.2f);
        StartCoroutine(FillBoardCo());
     }
 
     private IEnumerator FillBoardCo()
     {
         RefillBoard();
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.3f);
         while (MatchesonBoard())
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.3f);
             DestroMatches();
         }
-        yield return new WaitForSeconds(.5f);
+        findMatches.currenMatches.Clear();
+        currentDot = null;
+        yield return new WaitForSeconds(.3f);
         currenState = GameState.move;
     }
 
