@@ -331,6 +331,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2001854291}
   - component: {fileID: 2001854292}
+  - component: {fileID: 2001854293}
   m_Layer: 0
   m_Name: Board
   m_TagString: Untagged
@@ -366,10 +367,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currenState: 1
-  width: 7
+  width: 8
   height: 10
   offset: 30
   tilePrefab: {fileID: 5394783436334846453, guid: 84b7ba3b07f61474bafa1566db822ad4, type: 3}
+  breakableTilePrefab: {fileID: 1521713978954187448, guid: bfffd8d17cbb2df4f8379c94851a5b5c, type: 3}
   Dots:
   - {fileID: 7704391329292332241, guid: 6cdf918d5835f1d40ba5f610dea8f340, type: 3}
   - {fileID: 2984750634675278039, guid: 0b39d68b525963446842caf6682c2d92, type: 3}
@@ -381,22 +383,19 @@ MonoBehaviour:
   - {fileID: 3957766074407715782, guid: 07a5d7b075444e94e97bd85462cd1e46, type: 3}
   destroyEffect: {fileID: 7545029679536888653, guid: f3d81dac7e34a3c4f8c99a9823f72aaa, type: 3}
   currentDot: {fileID: 0}
-  boardLayout:
-  - x: 0
-    y: 0
-    typeOfTile: 1
-  - x: 6
-    y: 9
-    typeOfTile: 1
-  - x: 6
-    y: 0
-    typeOfTile: 1
-  - x: 0
-    y: 9
-    typeOfTile: 1
-  - x: 5
-    y: 4
-    typeOfTile: 1
-  - x: 4
-    y: 5
-    typeOfTile: 1
+  boardLayout: []
+--- !u!114 &2001854293
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2001854290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1aec6f25ee460e4b9dbf51c771f690b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hintDelay: 3
+  hintParticle: {fileID: 4163265744836524454, guid: ec2bb3ff78936314d8d075ba2eda6ee8, type: 3}
+  currentHint: {fileID: 0}

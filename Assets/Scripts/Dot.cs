@@ -17,7 +17,7 @@ public class Dot : MonoBehaviour
     public GameObject otherDot;
     Board board;
     FindMatches findMatches;
-
+    HintManager hintManager;
 
 
     Vector2 firstTouchPosition;
@@ -44,6 +44,7 @@ public class Dot : MonoBehaviour
         isAdjacentBomb = false;
         board = FindObjectOfType<Board>();
         findMatches = FindObjectOfType<FindMatches>();
+        hintManager = FindObjectOfType<HintManager>();  
         //targetX = (int)transform.position.x;
         //targetY = (int)transform.position.y;
         //row = targetY;
@@ -136,6 +137,12 @@ public class Dot : MonoBehaviour
 
     private void OnMouseDown()
     {
+        //Destroy Hint
+        if (hintManager.currentHint != null && hintManager != null)
+        {
+            hintManager.DestroyHint();
+        }
+
         if(board.currenState == GameState.move)
         {
 
