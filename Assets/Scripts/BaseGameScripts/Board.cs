@@ -484,7 +484,6 @@ public class Board : MonoBehaviour
 
             DamageConcrete(column,row);
             DamageSlime(column,row);
-            makeSlime = true;
 
             if (goalManager != null)
             {
@@ -629,20 +628,18 @@ public class Board : MonoBehaviour
 
     void CheckToMakeSlime()
     {
-        if (!makeSlime) return; // Don't make slime if the flag isn't set
-
-        for (int i = 0; i < width; i++)
+        for (int i = 0; i < width; i++) 
         {
             for (int j = 0; j < height; j++)
             {
-                if (slimeTiles[i, j] != null && makeSlime)
+                if(slimeTiles[i, j] != null && makeSlime)
                 {
-                    MakeNewSlime();  // Spread slime to nearby tiles
+                    MakeNewSlime();
                     return;
                 }
             }
         }
-
+        
     }
 
     Vector2 CheckForAdjacentPiece(int column,int row)
@@ -748,61 +745,51 @@ public class Board : MonoBehaviour
         yield return new WaitForSeconds(refillDelay);
         RefillBoard();
         yield return new WaitForSeconds(refillDelay);
-
         while (MatchesonBoard())
         {
             streakValue++;
-            DestroMatches();  // Destroy matches immediately if found
-            yield return new WaitForSeconds(refillDelay);  // Allow the destruction to complete before continuing
+            DestroMatches();
+            yield break;
+            //yield return new WaitForSeconds(refillDelay * 2);
         }
-
-        // Make sure to check for slime creation after pieces fall into place
-        CheckToMakeSlime();  // Trigger the slime spreading logic after refilling the board
-
-        // Check if the board is deadlocked and shuffle if necessary
+        currentDot = null;
+        CheckToMakeSlime();
         if (isDeadlocked())
         {
             StartCoroutine(ShuffleBoard());
         }
-
-        if (currenState != GameState.pause)
+        if(currenState != GameState.pause)
         {
             currenState = GameState.move;
         }
-
+        makeSlime = true;
         streakValue = 1;
     }
 
-
     private void RefillBoard()
     {
-        for (int i = 0; i < width; i++)
+        for(int i = 0; i < width; i++)
         {
-            for (int j = 0; j < height; j++)
+            for(int j = 0; j < height; j++)
             {
-                if (allDots[i, j] == null && !blankSpaces[i, j] && !concreteTiles[i, j] && !slimeTiles[i, j])
+                if (allDots[i,j] == null && !blankSpaces[i,j] && !concreteTiles[i,j] && !slimeTiles[i,j])
                 {
-                    Vector2 tempPosition = new Vector2(i, j + offset);
-                    int dotToUse = Random.Range(0, Dots.Length);
-
-                    // Ensure that a piece doesn't spawn in a match
+                    Vector2 tempPosition = new Vector2(i,j + offset);
+                    int dotToUse = Random.Range(0,Dots.Length);
                     int maxIteration = 0;
                     while (MatchesAt(i, j, Dots[dotToUse]) && maxIteration < 100)
                     {
                         maxIteration++;
                         dotToUse = Random.Range(0, Dots.Length);
                     }
-
-                    GameObject piece = Instantiate(Dots[dotToUse], tempPosition, Quaternion.identity);
-                    allDots[i, j] = piece;
+                    maxIteration = 0;
+                    GameObject piece = Instantiate(Dots[dotToUse], tempPosition, Quaternion.identity) as GameObject;
+                    allDots[i,j] = piece;
                     piece.GetComponent<Dot>().row = j;
                     piece.GetComponent<Dot>().column = i;
                 }
             }
         }
-
-        // Trigger match checking after refill
-        findMatches.FindAllMatches();
     }
 
     private bool MatchesonBoard()

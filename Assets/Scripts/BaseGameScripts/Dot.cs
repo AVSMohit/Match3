@@ -45,58 +45,73 @@ public class Dot : MonoBehaviour
         isRowBomb = false;
         isColorBomb = false;
         isAdjacentBomb = false;
-        
+        //board = FindObjectOfType<Board>();
         board = GameObject.FindWithTag("Board").GetComponent<Board>();
         findMatches = FindObjectOfType<FindMatches>();
         hintManager = FindObjectOfType<HintManager>();  
         endGameManager = FindObjectOfType<EndGameManager>();
         toggle = FindObjectOfType<SwitchToggle>();  
-       
+        //targetX = (int)transform.position.x;
+        //targetY = (int)transform.position.y;
+        //row = targetY;
+        //column = targetX;
+        //previousRow = row;
+        //previousColumn = column;
     }
 
   
+   
+ 
     
     // Update is called once per frame
     void Update()
     {
 
+
+        /*
+        if (isMatch)
+        {
+            SpriteRenderer mySprite = GetComponent<SpriteRenderer>();
+            mySprite.color = new Color(1f, 1f, 1f, .2f);
+        }
+        */
         targetX = column;
         targetY = row;
-
-        HandleMovement();
-
         #region Touch Input
-        if (Input.touchCount > 0)
-        {
-            Touch touch = Input.GetTouch(0);
-            if (touch.phase == TouchPhase.Began)
-            {
-                OnTouchDown(touch);
-            }
-            else if (touch.phase == TouchPhase.Ended)
-            {
-                OnTouchUp(touch);
-            }
-        }
+      //  if (Input.touchCount > 0)
+      //  {
+      //      if(touch.phase == TouchPhase.Began)
+      //      {
+      //          OnMouseDown();
+      //      }
+      //      if(touch.phase == TouchPhase.Ended)
+      //      {
+      //          OnMouseUp();
+      //      }
+      //}
         #endregion
-        // Mouse input handling (for testing in the editor)
-        if (Input.GetMouseButtonDown(0))
-        {
-            OnMouseDown();
-        }
-        else if (Input.GetMouseButtonUp(0))
-        {
-            OnMouseUp();
-        }
-
-
-    }
-
-    private void HandleMovement()
-    {
         if (Mathf.Abs(targetX - transform.position.x) > .1f)
         {
+            //Move Towards the Target
+            tempPosition = new Vector2 (targetX, transform.position.y);
+            transform.position = Vector2.Lerp(transform.position, tempPosition, 0.2f);
+            if (board.allDots[column,row] != this.gameObject) 
+            {
+                board.allDots[column, row] = this.gameObject;
+                findMatches.FindAllMatches();
+            }
+        }
+        else
+        {
+            //Directl Set Position
             tempPosition = new Vector2(targetX, transform.position.y);
+            transform.position = tempPosition;
+           
+        }
+        if(Mathf.Abs(targetY - transform.position.y) > .1f)
+        {
+            //Move Towards the Target
+            tempPosition = new Vector2 (transform.position.x, targetY);
             transform.position = Vector2.Lerp(transform.position, tempPosition, 0.2f);
             if (board.allDots[column, row] != this.gameObject)
             {
@@ -106,93 +121,72 @@ public class Dot : MonoBehaviour
         }
         else
         {
-            tempPosition = new Vector2(targetX, transform.position.y);
-            transform.position = tempPosition;
-        }
-
-        if (Mathf.Abs(targetY - transform.position.y) > .1f)
-        {
+            //Directl Set Position
             tempPosition = new Vector2(transform.position.x, targetY);
-            transform.position = Vector2.Lerp(transform.position, tempPosition, 0.2f);
-            if (board.allDots[column, row] != this.gameObject)
-            {
-                board.allDots[column, row] = this.gameObject;
-                findMatches.FindAllMatches();
-            }
+            transform.position = tempPosition;  
+            
         }
-        else
-        {
-            tempPosition = new Vector2(transform.position.x, targetY);
-            transform.position = tempPosition;
-        }
-    }
 
-    private void OnTouchDown(Touch touch)
-    {
-        if (board.currenState == GameState.move)
-        {
-            firstTouchPosition = Camera.main.ScreenToWorldPoint(touch.position);
-            if (hintManager != null)
-            {
-                hintManager.DestroyHint();
-            }
-        }
-    }
-
-    private void OnTouchUp(Touch touch)
-    {
-        if (board.currenState == GameState.move)
-        {
-            finalTouchPosition = Camera.main.ScreenToWorldPoint(touch.position);
-            CalculateAngle();
-        }
+        
     }
 
     private void OnMouseDown()
     {
-        if (board.currenState == GameState.move)
+        //Destroy Hint
+        if (hintManager != null)
         {
-            firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            if (hintManager != null)
-            {
-                hintManager.DestroyHint();
-            }
+            hintManager.DestroyHint();
         }
-    }
 
+
+
+        if(board.currenState == GameState.move)
+        {
+
+            firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            //firstTouchPosition = touch.position;
+        }
+
+    }
 
     private void OnMouseUp()
     {
-        if (board.currenState == GameState.move)
+        if(board.currenState == GameState.move)
         {
+
             finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            //finalTouchPosition = touch.position;
             CalculateAngle();
         }
+       
     }
 
-    private void CalculateAngle()
+    void CalculateAngle()
     {
-        if (Mathf.Abs(finalTouchPosition.y - firstTouchPosition.y) > swipeResist || Mathf.Abs(finalTouchPosition.x - firstTouchPosition.x) > swipeResist)
+        if(Mathf.Abs(finalTouchPosition.y - firstTouchPosition.y) > swipeResist || Mathf.Abs(finalTouchPosition.x - firstTouchPosition.x) > swipeResist)
         {
             board.currenState = GameState.wait;
             swipeAngle = Mathf.Atan2(finalTouchPosition.y - firstTouchPosition.y, finalTouchPosition.x - firstTouchPosition.x) * 180 / Mathf.PI;
+     
             MoveDot();
             board.currentDot = this;
         }
         else
         {
             board.currenState = GameState.move;
+            
         }
     }
 
-    private void MovePiecesActual(Vector2 direction)
+    void MovePiecesActual(Vector2 direction)
     {
         otherDot = board.allDots[column + (int)direction.x, row + (int)direction.y];
         previousRow = row;
         previousColumn = column;
 
-        if (board.lockTiles[column, row] == null && board.lockTiles[column + (int)direction.x, row + (int)direction.y] == null)
+        if (board.lockTiles[column,row] == null && board.lockTiles[column+(int)direction.x,row+(int)direction.y] == null)
         {
+
             if (otherDot != null)
             {
                 otherDot.GetComponent<Dot>().column += -1 * (int)direction.x;
@@ -210,31 +204,42 @@ public class Dot : MonoBehaviour
         {
             board.currenState = GameState.move;
         }
+
     }
 
-
-    private void MoveDot()
+    void MoveDot()
     {
-        if (swipeAngle > -45 && swipeAngle <= 45 && column < board.width - 1)
+        if (swipeAngle > -45 && swipeAngle <= 45  && column < board.width - 1 )
         {
+            //right swipe
             MovePiecesActual(Vector2.right);
+
         }
-        else if (swipeAngle > 45 && swipeAngle <= 135 && row < board.height - 1)
+        else if (swipeAngle > 45 && swipeAngle <= 135 && row < board.height - 1 )
         {
+            //Up swipe
             MovePiecesActual(Vector2.up);
+           
         }
-        else if ((swipeAngle > 135 || swipeAngle <= -135) && column > 0)
+        else if ((swipeAngle > 135 || swipeAngle <= -135) && column > 0 )
         {
+            //Left swipe
             MovePiecesActual(Vector2.left);
+          
         }
         else if (swipeAngle < -45 && swipeAngle >= -135 && row > 0)
         {
+            //Down swipe
             MovePiecesActual(Vector2.down);
+        
         }
         else
         {
+       
             board.currenState = GameState.move;
         }
+
+        toggle.toggle.isOn = false;
     }
 
     void FindMatches()
@@ -273,20 +278,45 @@ public class Dot : MonoBehaviour
 
     IEnumerator CheckMoveCo()
     {
-        yield return new WaitForSeconds(0.5f);
-        // Check for matches and revert the move if needed
-        if (!isMatch && !otherDot.GetComponent<Dot>().isMatch)
+        if(isColorBomb)
         {
-            otherDot.GetComponent<Dot>().row = row;
-            otherDot.GetComponent<Dot>().column = column;
-            row = previousRow;
-            column = previousColumn;
-            yield return new WaitForSeconds(0.5f);
-            board.currenState = GameState.move;
+            //this piece is collor bomb and other piece is the color to destroy
+            findMatches.MatchPiecesofColor(otherDot.tag);
+            isMatch = true;
         }
-        else
+        else if (otherDot.GetComponent<Dot>().isColorBomb)
         {
-            board.DestroMatches();
+            //the other piece is color bomb and this piece is to be destroyed
+            findMatches.MatchPiecesofColor(this.gameObject.tag);
+            otherDot.GetComponent<Dot>().isMatch = true;
+        }
+
+        yield return new WaitForSeconds(.5f);
+        if(otherDot != null)
+        {
+            if (!isMatch && !otherDot.GetComponent<Dot>().isMatch)
+            {
+                otherDot.GetComponent<Dot>().row = row;
+                otherDot.GetComponent<Dot>().column = column;
+                row = previousRow;
+                column = previousColumn;
+                yield return new WaitForSeconds(.5f);
+                board.currentDot = null;
+                board.currenState = GameState.move;
+            }
+            else
+            {
+                if(endGameManager != null)
+                {
+                    if(endGameManager.requirements.gameType == GameType.Moves)
+                    {
+                        endGameManager.DecreaseCounterValue();
+                    }
+                }
+                board.DestroMatches();
+            }
+
+           // otherDot = null;
         }
     }
 

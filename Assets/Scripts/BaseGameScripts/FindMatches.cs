@@ -98,60 +98,77 @@ public class FindMatches : MonoBehaviour
     void GetNearByPieces(GameObject dot1,GameObject dot2,GameObject dot3)
     {
 
-        if (dot1 != null && dot2 != null && dot3 != null)
-        {
-            // Make sure that only adjacent pieces are added to the match list
-            if (Vector2.Distance(dot1.transform.position, dot2.transform.position) == 1 &&
-                Vector2.Distance(dot2.transform.position, dot3.transform.position) == 1)
-            {
-                AddTolistAndMatch(dot1);
-                AddTolistAndMatch(dot2);
-                AddTolistAndMatch(dot3);
-            }
-        }
-
-
+        AddTolistAndMatch(dot1 );
+        AddTolistAndMatch(dot2 );
+        AddTolistAndMatch(dot3 );
+     
+        
     }
 
     IEnumerator FindAllMatchesCo()
     {
         //yield return new WaitForSeconds(0.2f);
         yield return null;
-        for (int i = 0; i < board.width; i++)
+        for(int i = 0;i<board.width;i++)
         {
-            for (int j = 0; j < board.height; j++)
+            for(int j = 0;j<board.height;j++)
             {
-                GameObject currentDot = board.allDots[i, j];
-                if (currentDot != null)
+                GameObject currentDot = board.allDots[i,j];
+                if(currentDot != null)
                 {
-                    Dot currentDotComponent = currentDot.GetComponent<Dot>();
-                    // Check left and right pieces
-                    if (i > 0 && i < board.width - 1)
+                   Dot currentdotDot = currentDot.GetComponent<Dot>();
+                    if(i > 0 && i<board.width - 1)
                     {
-                        GameObject leftDot = board.allDots[i - 1, j];
-                        GameObject rightDot = board.allDots[i + 1, j];
 
-                        if (leftDot != null && rightDot != null)
-                        {
-                            if (leftDot.tag == currentDot.tag && rightDot.tag == currentDot.tag)
+                        GameObject leftDot = board.allDots[i - 1,j];
+                        GameObject rightDot = board.allDots[i+1,j];
+
+                            if(leftDot != null && rightDot != null)
                             {
-                                GetNearByPieces(leftDot, currentDot, rightDot);
+    
+                                Dot rightdotDot = rightDot.GetComponent<Dot>();
+                                Dot leftdotDot = leftDot.GetComponent<Dot>();
+
+                                if (leftDot != null && rightDot != null)
+                                {
+                                    if(leftDot.tag == currentDot.tag && rightDot.tag == currentDot.tag) 
+                                    {
+                                        currenMatches.Union(IsRowBomb(leftdotDot, currentdotDot, rightdotDot));
+
+                                        currenMatches.Union(IsColumnBomb(leftdotDot,currentdotDot, rightdotDot));
+
+                                        currenMatches.Union(IsAdjacentBomb(leftdotDot, currentdotDot, rightdotDot));
+
+                                        GetNearByPieces(leftDot,currentDot ,rightDot);
+
+                                    }
+                                }
                             }
-                        }
                     }
-                    // Check up and down pieces
                     if (j > 0 && j < board.height - 1)
                     {
-                        GameObject upDot = board.allDots[i, j + 1];
-                        GameObject downDot = board.allDots[i, j - 1];
+                            GameObject upDot = board.allDots[i, j + 1];
+                            GameObject downDot = board.allDots[i, j -1 ];
 
-                        if (upDot != null && downDot != null)
-                        {
-                            if (upDot.tag == currentDot.tag && downDot.tag == currentDot.tag)
+                            if(upDot != null && downDot != null)
                             {
-                                GetNearByPieces(upDot, currentDot, downDot);
+
+                                Dot downdotDot = downDot.GetComponent<Dot>();
+                                Dot UpdotDot = upDot.GetComponent<Dot>();
+                                if (upDot != null && downDot != null)
+                                {
+                                    if (upDot.tag == currentDot.tag && downDot.tag == currentDot.tag)
+                                    {
+                                        currenMatches.Union(IsColumnBomb(UpdotDot, currentdotDot, downdotDot));
+
+                                        currenMatches.Union(IsRowBomb(UpdotDot, currentdotDot, downdotDot));
+
+                                        currenMatches.Union(IsAdjacentBomb(UpdotDot, currentdotDot, downdotDot));
+
+                                        GetNearByPieces(upDot, currentDot, downDot);
+                                    }
+                                }   
                             }
-                        }
                     }
                 }
             }
