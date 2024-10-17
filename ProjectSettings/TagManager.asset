@@ -12,6 +12,13 @@ TagManager:
   - Purple Dot
   - Teal Dot
   - Yellow Dot
+  - Color
+  - Breakable
+  - Board
+  - Concrete
+  - Chocolate
+  - Lock
+  - Slime
   layers:
   - Default
   - TransparentFX
